@@ -34,9 +34,12 @@ else
     PR_NUMBER=$(echo "$COMMIT_MESSAGE" | grep -o -E '[0-9]+')
 
     COMMIT_JSON=$(curl -H "Authorization: token $DEPLOY_NOTIFY_GITHUB_AUTH_TOKEN" https://api.github.com/repos/$DEPLOY_NOTIFY_GITHUB_ORG/$DEPLOY_NOTIFY_GITHUB_PROJECT/pulls/$PR_NUMBER)
-    PULL_TITLE=$( (echo "$COMMIT_JSON" | python3 -c "import sys, json; print(json.load(sys.stdin, strict=False)['title'])" || echo '') | head -n 1)
+    COMMIT_MESSAGE=$( (echo "$COMMIT_JSON" | python3 -c "import sys, json; print(json.load(sys.stdin, strict=False)['title'])" || echo '') | head -n 1)
     PULL_BODY=$( (echo "$COMMIT_JSON" | python3 -c "import sys, json; print(json.load(sys.stdin, strict=False)['body'])" || echo '') | head -n 1)
-    COMMIT_MESSAGE="$PULL_TITLE\n$PULL_BODY"
+
+    if [[ "$PULL_BODY" != "None" ]]; then
+      COMMIT_MESSAGE="$COMMIT_MESSAGE\n$PULL_BODY"
+    fi
   fi
 
   COMMIT_URL=$(echo "$COMMIT_JSON" | python3 -c "import sys, json; print(json.load(sys.stdin, strict=False)['html_url'])" || echo 'Can not reach Github...')
