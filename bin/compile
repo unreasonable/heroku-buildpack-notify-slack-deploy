@@ -27,15 +27,15 @@ elif [[ -z "${SOURCE_VERSION}" ]]; then
 else
   COMMIT_JSON=$(curl -H "Authorization: token $DEPLOY_NOTIFY_GITHUB_AUTH_TOKEN" https://api.github.com/repos/$DEPLOY_NOTIFY_GITHUB_ORG/$DEPLOY_NOTIFY_GITHUB_PROJECT/commits/$SOURCE_VERSION)
   AUTHOR_NAME=$(echo "$COMMIT_JSON" | python3 -c "import sys, json; print(json.load(sys.stdin, strict=False)['commit']['author']['name'])" || echo '')
-  COMMIT_MESSAGE=$((echo "$COMMIT_JSON" | python3 -c "import sys, json; print(json.load(sys.stdin, strict=False)['commit']['message'])" || echo '') | head -n 1)
+  COMMIT_MESSAGE=$( (echo "$COMMIT_JSON" | python3 -c "import sys, json; print(json.load(sys.stdin, strict=False)['commit']['message'])" || echo '') | head -n 1)
 
   if [[ "$COMMIT_MESSAGE" == *"Merge pull request"* ]]; then
     # This is a PR merge commit and should pull details from the originating PR
     PR_NUMBER=$(echo "$COMMIT_MESSAGE" | grep -o -E '[0-9]+')
 
     COMMIT_JSON=$(curl -H "Authorization: token $DEPLOY_NOTIFY_GITHUB_AUTH_TOKEN" https://api.github.com/repos/$DEPLOY_NOTIFY_GITHUB_ORG/$DEPLOY_NOTIFY_GITHUB_PROJECT/pulls/$PR_NUMBER)
-    PULL_TITLE=$((echo "$COMMIT_JSON" | python3 -c "import sys, json; print(json.load(sys.stdin, strict=False)['title'])" || echo '') | head -n 1)
-    PULL_BODY=$((echo "$COMMIT_JSON" | python3 -c "import sys, json; print(json.load(sys.stdin, strict=False)['body'])" || echo '') | head -n 1)
+    PULL_TITLE=$( (echo "$COMMIT_JSON" | python3 -c "import sys, json; print(json.load(sys.stdin, strict=False)['title'])" || echo '') | head -n 1)
+    PULL_BODY=$( (echo "$COMMIT_JSON" | python3 -c "import sys, json; print(json.load(sys.stdin, strict=False)['body'])" || echo '') | head -n 1)
     COMMIT_MESSAGE="$PULL_TITLE\n$PULL_BODY"
   fi
 
