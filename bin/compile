@@ -29,7 +29,7 @@ else
   AUTHOR_NAME=$(echo "$COMMIT_JSON" | python3 -c "import sys, json; print(json.load(sys.stdin, strict=False)['commit']['author']['name'])" || echo '')
   COMMIT_MESSAGE=$((echo "$COMMIT_JSON" | python3 -c "import sys, json; print(json.load(sys.stdin, strict=False)['commit']['message'])" || echo '') | head -n 1)
 
-  if [[ "$COMMIT_MESSAGE" == "Merge pull request"* ]]; then
+  if grep -q "Merge pull request" <<< "$COMMIT_MESSAGE"; then
     # This is a PR merge commit and should pull details from the originating PR
     PR_NUMBER=$(echo "$COMMIT_MESSAGE" | grep -o -E '[0-9]+')
     COMMIT_JSON=$(curl -H "Authorization: token $DEPLOY_NOTIFY_GITHUB_AUTH_TOKEN" https://api.github.com/repos/$DEPLOY_NOTIFY_GITHUB_ORG/$DEPLOY_NOTIFY_GITHUB_PROJECT/pulls/$PR_NUMBER)
